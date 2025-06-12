@@ -1,0 +1,1 @@
+INSERT INTO posts (posts_id, posts_title, posts_body, posts_created_on) VALUES (1, 'Juan Pérez', 'juan.perez@example.com', '2025-06-01T00:00')
