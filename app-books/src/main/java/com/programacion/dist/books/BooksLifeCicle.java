@@ -2,6 +2,7 @@ package com.programacion.dist.books;
 
 import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.StartupEvent;
+import io.vertx.ext.consul.CheckOptions;
 import io.vertx.ext.consul.ConsulClientOptions;
 import io.vertx.ext.consul.ServiceOptions;
 import io.vertx.mutiny.core.Vertx;
@@ -35,6 +36,7 @@ public class BooksLifeCicle {
     //cuando arranque la app
     void init(@Observes StartupEvent event, Vertx vertx) throws Exception {
 
+        System.out.println("Iniciando servicio de books...");
         //creamos el consul client
         ConsulClientOptions options = new ConsulClientOptions()
                 .setHost(consulHost)
@@ -43,7 +45,7 @@ public class BooksLifeCicle {
         ConsulClient consulClient = ConsulClient.create(vertx,options);
 
         serviceId = UUID.randomUUID().toString();
-        var ipAddress = InetAddress.getLoopbackAddress();
+        var ipAddress = InetAddress.getLocalHost();
 
         //registro
         var tags = List.of(
@@ -52,12 +54,20 @@ public class BooksLifeCicle {
                 "traefik.http.routers.app-books.middlewares=strip-prefix-books",
                 "traefik.http.middlewares.strip-prefix-books.stripprefix.prefixes=/app-books"
         );
+
+        var checkOptions = new CheckOptions()
+//                .setHttp("http://127.0.0.1:9090/ping") // Esto estatico
+                .setHttp(String.format(("http://%s:%s/ping"), ipAddress.getHostAddress(), appPort))
+                .setInterval("10s")
+                .setDeregisterAfter("20s");
+
         ServiceOptions serviceOption = new ServiceOptions()
                 .setName("app-books")
                 .setId(serviceId)
                 .setAddress(ipAddress.getHostAddress())
                 .setPort(appPort)
-                .setTags(tags);
+                .setTags(tags)
+                .setCheckOptions(checkOptions);
 
         consulClient.registerServiceAndAwait(serviceOption);
 
@@ -66,6 +76,8 @@ public class BooksLifeCicle {
 
     //cuando pare la app
     void stop(@Observes ShutdownEvent event, Vertx vertx){
+
+        System.out.println("Deteniendo servicio de books...");
 
         ConsulClientOptions options = new ConsulClientOptions()
                 .setHost(consulHost)

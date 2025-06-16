@@ -35,6 +35,7 @@ public class AuthorsLifeCicle {
 
     //cuando arranque la app
     void init(@Observes StartupEvent event, Vertx vertx) throws Exception {
+        System.out.println("Iniciando servicio de autoresss...");
 
         //creamos el consul client
         ConsulClientOptions options = new ConsulClientOptions()
@@ -42,9 +43,8 @@ public class AuthorsLifeCicle {
                 .setPort(consulPort);
 
         ConsulClient consulClient = ConsulClient.create(vertx,options);
-
         serviceId = UUID.randomUUID().toString();
-        var ipAddress = InetAddress.getLoopbackAddress();
+        var ipAddress = InetAddress.getLocalHost();
 
         //registro
         var tags = List.of(
@@ -76,6 +76,7 @@ public class AuthorsLifeCicle {
     //cuando pare la app
     void stop(@Observes ShutdownEvent event, Vertx vertx){
 
+        System.out.println("Deteniendo servicio de autoresss...");
         ConsulClientOptions options = new ConsulClientOptions()
                 .setHost(consulHost)
                 .setPort(consulPort);

@@ -9,11 +9,11 @@ import jakarta.transaction.Transactional;
 @ApplicationScoped
 public class BooksRepository implements PanacheRepositoryBase<Book, String> {
 
-//    public Book findById(String isbn){
-//        String query = "SELECT b FROM Book b WHERE b.isbn = ?1";
-//        return this.find(query, isbn).firstResult();
-//
-//    }
+    public Book findById(String isbn){
+        String query = "SELECT b FROM Book b WHERE b.isbn = ?1";
+        return this.find(query, isbn).firstResult();
+
+    }
 
     public void update(String isbn, Book book) {
         this.findByIdOptional(isbn)
